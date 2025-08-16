@@ -7,24 +7,35 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  tests:
+    name: run-tests
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Set up cache
+
+      - name: Cache pip
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - name: Install tooling
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install -r requirements.txt || true
+          pip install pytest ruff black
+
+      - name: Lint
+        run: |
+          ruff check .
+          black --check .
+
       - name: Run tests
-        run: pytest -q || true  # placeholder until tests exist
+        run: pytest -q
