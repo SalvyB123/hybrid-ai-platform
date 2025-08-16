@@ -36,4 +36,4 @@ tests/
 - Run lint and tests via `make` (see `Makefile`).
 
 ## Roadmap references
-See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.
+See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
