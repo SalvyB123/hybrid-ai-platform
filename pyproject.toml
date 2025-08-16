@@ -1,0 +1,16 @@
+[project]
+name = "hybrid-ai-platform"
+version = "0.0.1"
+description = "Foundations for an enterprise-ready multi-vertical AI assistant platform"
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F"]
