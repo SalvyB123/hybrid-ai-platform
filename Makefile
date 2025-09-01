@@ -34,3 +34,18 @@ test-cov:
 
 run:
 	python -m uvicorn src.api.app:app --reload --port 8000
+
+.PHONY: db-up db-down db-logs db-psql
+
+db-up:
+	docker compose up -d db
+
+db-down:
+	docker compose down
+
+db-logs:
+	docker compose logs -f db
+
+db-psql:
+	docker compose exec -it db psql -U $$APP_DB_USER -d $$APP_DB_NAME
+
