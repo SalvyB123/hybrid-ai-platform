@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # General
     app_env: str = "local"  # maps to APP_ENV
-    debug: bool = True      # maps to DEBUG
+    debug: bool = True  # maps to DEBUG
 
     # DB pieces
     app_db_user: str = "appuser"
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     app_db_url: str | None = None  # optional override
 
     # Optional pgAdmin (present in .env for docker-compose)
-    pgadmin_email: str | None = None     # maps to PGADMIN_EMAIL
+    pgadmin_email: str | None = None  # maps to PGADMIN_EMAIL
     pgadmin_password: str | None = None  # maps to PGADMIN_PASSWORD
 
     @field_validator("app_db_url", mode="before")
