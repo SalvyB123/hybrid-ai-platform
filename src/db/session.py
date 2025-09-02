@@ -15,6 +15,7 @@ from src.config.settings import get_settings
 # ---- Declarative base for your ORM models ----
 class Base(DeclarativeBase):
     """Base class for SQLAlchemy ORM models."""
+
     pass
 
 
@@ -24,9 +25,9 @@ _settings = get_settings()
 # Create the async engine from env-driven URL, with sane defaults
 engine: AsyncEngine = create_async_engine(
     _settings.app_db_url,
-    echo=False,           # flip to True locally if you want SQL in logs
-    pool_pre_ping=True,   # validates connections before using them
-    future=True,          # SQLAlchemy 2.0 style
+    echo=False,  # flip to True locally if you want SQL in logs
+    pool_pre_ping=True,  # validates connections before using them
+    future=True,  # SQLAlchemy 2.0 style
 )
 
 # Session factory; each request gets its own session

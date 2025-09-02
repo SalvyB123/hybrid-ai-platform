@@ -49,7 +49,7 @@ async def health() -> Dict[str, Any]:
     try:
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))
-            db_ok = (result.scalar_one() == 1)
+            db_ok = result.scalar_one() == 1
     except Exception:
         db_ok = False
 
@@ -58,4 +58,3 @@ async def health() -> Dict[str, Any]:
         "env": settings.app_env,
         "db": "up" if db_ok else "down",
     }
-
