@@ -49,3 +49,23 @@ db-logs:
 db-psql:
 	docker compose exec -it db psql -U $$APP_DB_USER -d $$APP_DB_NAME
 
+# --- Alembic helpers ---
+ALEMBIC=python -m alembic
+
+mig-rev:
+	@if [ -z "$(m)" ]; then echo "Usage: make mig-rev m=\"message\""; exit 1; fi
+	$(ALEMBIC) revision --autogenerate -m "$(m)"
+
+mig-up:
+	$(ALEMBIC) upgrade head
+
+mig-down:
+	@if [ -z "$(s)" ]; then echo "Usage: make mig-down s=\"-1\""; exit 1; fi
+	$(ALEMBIC) downgrade $(s)
+
+mig-history:
+	$(ALEMBIC) history
+
+mig-current:
+	$(ALEMBIC) current
+
