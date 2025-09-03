@@ -11,6 +11,30 @@ jobs:
         name: run-tests
         runs-on: ubuntu-latest
 
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: app
+                ports: ["5432:5432"]
+                options: >-
+                    --health-cmd="pg_isready -U postgres -d app"
+                    --health-interval=5s
+                    --health-timeout=5s
+                    --health-retries=10
+
+        env:
+            # If your Settings() accepts a full async URL, this is sufficient:
+            APP_DB_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/app
+            # If your Settings() assembles the URL from parts, these help as well:
+            APP_DB_HOST: localhost
+            APP_DB_PORT: 5432
+            APP_DB_USER: postgres
+            APP_DB_PASSWORD: postgres
+            APP_DB_NAME: app
+
         steps:
             - uses: actions/checkout@v4
 
@@ -32,10 +56,23 @@ jobs:
                   pip install -r requirements.txt
                   pip install -r requirements-dev.txt
 
+            # Keep your quality gates
             - name: Lint
               run: |
                   ruff check .
                   black --check --diff .
+
+            # Ensure DB is healthy before running migrations
+            - name: Wait for database
+              run: |
+                  for i in {1..30}; do
+                    pg_isready -h localhost -p 5432 -U postgres && break
+                    sleep 2
+                  done
+
+            # Run Alembic migrations BEFORE tests
+            - name: Run migrations
+              run: python -m alembic upgrade head
 
             - name: Run tests
               run: pytest -q
