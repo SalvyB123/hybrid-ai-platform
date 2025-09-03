@@ -10,11 +10,10 @@ An enterprise-ready, multi-vertical AI assistant platform. This repository start
 
 ## Directory map
 
-```
-.github/workflows/      # CI setup (lint/test)
-adr/                    # Architecture Decision Records
-docs/                   # Diagrams, notes, planning
-scripts/                # Dev and CI helper scripts
+.github/workflows/ # CI setup (lint/test)
+adr/ # Architecture Decision Records
+docs/ # Diagrams, notes, planning
+scripts/ # Dev and CI helper scripts
 src/
   api/                  # FastAPI app (REST endpoints)
   ai/
