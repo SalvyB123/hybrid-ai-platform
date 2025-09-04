@@ -47,7 +47,8 @@ db-logs:
 	docker compose logs -f db
 
 db-psql:
-	docker compose exec -it db psql -U $$APP_DB_USER -d $$APP_DB_NAME
+	@set -a; [ -f .env ] && . .env; set +a; \
+	docker compose exec -T db psql -U $$APP_DB_USER -d $$APP_DB_NAME -c "$(c)"
 
 # --- Alembic helpers ---
 ALEMBIC=python -m alembic
