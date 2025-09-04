@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 # Your app imports
 from src.config.settings import Settings
 from src.db.session import Base  # Base.metadata must exist
-from src.db import models
+from src.db import models  # noqa: F401
 
 # Alembic Config
 config = context.config
