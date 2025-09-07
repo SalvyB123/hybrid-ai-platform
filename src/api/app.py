@@ -3,7 +3,17 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import Any, Dict
 
+# src/api/app.py
 from fastapi import FastAPI
+from src.api.routes.bookings import router as bookings_router
+
+def create_app() -> FastAPI:
+    app = FastAPI()
+    app.include_router(bookings_router)
+    return app
+
+app = create_app()
+
 from sqlalchemy import text
 
 from src.config.settings import get_settings
