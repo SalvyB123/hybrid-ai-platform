@@ -66,7 +66,9 @@ async def list_bookings(
 
 
 @router.patch("/{booking_id}", response_model=BookingOut)
-async def update_booking(booking_id: UUID, payload: BookingUpdate, db: AsyncSession = Depends(get_db)):
+async def update_booking(
+    booking_id: UUID, payload: BookingUpdate, db: AsyncSession = Depends(get_db)
+):
     """Partial update; only provided fields change. Returns the updated row."""
     _ = await _get_booking_or_404(db, booking_id)  # ensure it exists
 
