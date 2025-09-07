@@ -2,10 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
-# Shared fields for create and update
 class BookingBase(BaseModel):
     customer_name: str = Field(min_length=1, max_length=120)
     customer_email: EmailStr
@@ -13,21 +12,18 @@ class BookingBase(BaseModel):
     ends_at: datetime
     notes: Optional[str] = None
 
-    @field_validator("ends_at")
-    @classmethod
-    def ends_after_starts(cls, v: datetime, values: dict) -> datetime:
-        starts = values.get("starts_at")
-        if starts and v <= starts:
+    # Pydantic v2 cross-field validation
+    @model_validator(mode="after")
+    def _check_times(self):
+        if self.ends_at <= self.starts_at:
             raise ValueError("ends_at must be after starts_at")
-        return v
+        return self
 
 
-# Create schema = all required
 class BookingCreate(BookingBase):
     pass
 
 
-# Update schema = all optional
 class BookingUpdate(BaseModel):
     customer_name: Optional[str] = None
     customer_email: Optional[EmailStr] = None
@@ -35,8 +31,15 @@ class BookingUpdate(BaseModel):
     ends_at: Optional[datetime] = None
     notes: Optional[str] = None
 
+    @model_validator(mode="after")
+    def _check_times_if_both_present(self):
+        # Only validate if both are provided in a partial update
+        if self.starts_at is not None and self.ends_at is not None:
+            if self.ends_at <= self.starts_at:
+                raise ValueError("ends_at must be after starts_at")
+        return self
 
-# Output schema = full DB record
+
 class BookingOut(BookingBase):
     id: UUID
     status: str
@@ -44,4 +47,4 @@ class BookingOut(BookingBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True  # ORM mode in Pydantic v2
+        from_attributes = True  # Pydantic v2: ORM mode
