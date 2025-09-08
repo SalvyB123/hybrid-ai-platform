@@ -50,6 +50,7 @@ This is the most **cost-effective**, **deterministic**, and **testable** path to
 
 ## 4. Architecture (V1)
 
+```text
 Client → FastAPI /faq/ask
 │
 ▼
@@ -62,6 +63,7 @@ NumPy cosine top-1)
 ▼ ▼
 Return FAQ SMTP (MailHog)
 answer+source (question + context)
+```
 
 ---
 
