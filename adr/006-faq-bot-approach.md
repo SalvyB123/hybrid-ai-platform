@@ -1,6 +1,6 @@
 # ADR-006: FAQ Bot Approach
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2025-09-08  
 **Context:** Week 4 – Foundations (Lean MVP)
 
