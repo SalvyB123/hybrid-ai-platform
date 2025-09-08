@@ -19,7 +19,9 @@ src/
   api/                  # FastAPI app (REST endpoints)
   ai/
     rag/                # Retrieval-Augmented Generation utilities
-    faq/                # FAQ bot logic (RAG + thresholds + handoff)    forecasting/        # Prophet baseline + interfaces    sentiment/          # Sentiment analysis + action hooks
+    faq/                # FAQ bot logic (RAG + thresholds + handoff)
+    forecasting/        # Prophet baseline + interfaces
+    sentiment/          # Sentiment analysis + action hooks
   clients/              # Integrations (e.g., Google Calendar)
   config/               # App settings, env parsing
   db/
