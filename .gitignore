@@ -41,3 +41,5 @@ coverage/
 # Data artifacts
 data/
 !data/.gitkeep
+# Allow curated seed data to be versioned
+!data/faqs.yaml

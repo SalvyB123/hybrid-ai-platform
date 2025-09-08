@@ -1,0 +1,29 @@
+- id: faq-001
+  question: "How do I book a demo?"
+  answer: "Create a booking via POST /bookings or email demo@example.local."
+  tags: ["booking", "demo"]
+
+- id: faq-002
+  question: "How do I cancel a booking?"
+  answer: "Send DELETE /bookings/{id} or contact support@example.local."
+  tags: ["booking", "cancel"]
+
+- id: faq-003
+  question: "What authentication do you use?"
+  answer: "MVP uses a JWT login stub with role-based routes coming in V2."
+  tags: ["auth"]
+
+- id: faq-004
+  question: "Is my data stored securely?"
+  answer: "Data lives in Postgres; logs are GDPR-safe with basic redaction."
+  tags: ["gdpr", "security"]
+
+- id: faq-005
+  question: "Do you integrate with Google Calendar?"
+  answer: "V2 will sync with Google Calendar; MVP demonstrates local CRUD."
+  tags: ["calendar", "integration"]
+
+- id: faq-006
+  question: "Where can I see the roadmap?"
+  answer: "See docs/roadmap.md and ADRs in /adr for decisions."
+  tags: ["roadmap", "docs"]
