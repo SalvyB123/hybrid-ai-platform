@@ -94,6 +94,45 @@ before executing tests to ensure the schema is always up to date.
 
 See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
 
+## FAQ BOT (V1)
+
+The FAQ Bot is a minimal retrieval-based assistant. It loads a small set of curated FAQs `from data/faqs.yaml`, encodes them into embeddings, and serves answers through a FastAPI endpoint.
+This approach keeps costs at zero (no paid APIs) and ensures deterministic behaviour. If a question is close enough to one of the stored FAQs, the corresponding answer is returned.
+
+# Quickstart
+
+1. Run the API:
+
+```bash
+uvicorn src.api.app:app --reload
+```
+
+2. Ask a question:
+
+```bash
+curl -X POST http://localhost:8000/faq/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question":"How do I book a demo?"}'
+```
+
+3. Expected respsone:
+
+```bash
+{
+  "answer": "Create a booking via POST /bookings or email demo@example.local.",
+  "score": 0.89,
+  "source_id": "faq-001"
+}
+```
+
+# How it works
+
+-   **Data souce:** `data/faqs.yaml` stores questions and answers.
+-   **Embeddings:** `sentence-transformers/all-MiniLM-L6-v2` (downloaded on first run) encodes the questions.
+-   **Retrieval:** Cosine similarity is used to find the closest match.
+-   **API contract:** `POST /faq/ask` with a question returns the best-matched FAQ answer.
+-   **Tests:** Unit and integration tests validate retrieval behaviour without requiring external services.
+
 ## Branching & PRs (modern Git)
 
 We use modern Git commands. Prefer `git switch` for branches and `git restore` for files.
