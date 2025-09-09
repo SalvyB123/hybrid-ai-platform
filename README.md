@@ -94,7 +94,7 @@ before executing tests to ensure the schema is always up to date.
 
 See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
 
-## FAQ BOT (V1)
+### FAQ BOT (V1)
 
 The FAQ Bot is a minimal retrieval-based assistant. It loads a small set of curated FAQs `from data/faqs.yaml`, encodes them into embeddings, and serves answers through a FastAPI endpoint.
 This approach keeps costs at zero (no paid APIs) and ensures deterministic behaviour. If a question is close enough to one of the stored FAQs, the corresponding answer is returned.
@@ -132,6 +132,18 @@ curl -X POST http://localhost:8000/faq/ask \
 -   **Retrieval:** Cosine similarity is used to find the closest match.
 -   **API contract:** `POST /faq/ask` with a question returns the best-matched FAQ answer.
 -   **Tests:** Unit and integration tests validate retrieval behaviour without requiring external services.
+
+### Confidence and fallback
+
+The service normalises cosine similarity to `[0,1]` and compares it with `FAQ_CONFIDENCE_THRESHOLD` (default `0.60`).  
+If the score is below the threshold, the endpoint returns a `handoff` response and triggers an email to a human inbox.
+
+**Local email (MailHog):**
+
+```bash
+docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog
+open http://localhost:8025
+```
 
 ## Branching & PRs (modern Git)
 
