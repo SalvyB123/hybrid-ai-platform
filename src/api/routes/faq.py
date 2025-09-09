@@ -1,29 +1,69 @@
 from __future__ import annotations
+
 from fastapi import APIRouter
+import numpy as np
 
 from src.ai.faq.data_loader import load_faqs
 from src.ai.faq.embedder import load_or_build_embeddings, MiniLMEmbedder
-from src.ai.faq.retriever import cosine_top1
-from src.api.schemas.faq import FAQAskRequest, FAQAnswer
+from src.ai.faq.retriever import cosine_top1, score_from_cosine
+from src.api.schemas.faq import FAQAskRequest, FAQAnswer, FAQHandoff
+from src.config.settings import get_settings
+from src.ai.faq.notify import send_handoff_email, FAQContext
 
 router = APIRouter(prefix="/faq", tags=["faq"])
+settings = get_settings()
 
-# --- Warm state (module-level for simplicity) ---
-_FAQS = load_faqs()
-_QS = [f.question for f in _FAQS]
-_DOC_EMB, _USED_CACHE = load_or_build_embeddings(_QS)
-_EMBEDDER = None if _USED_CACHE else MiniLMEmbedder()
+# --- Lazy-initialised state (safe for tests) ---
+_FAQS: list | None = None
+_DOC_EMB: np.ndarray | None = None
+_EMBEDDER: MiniLMEmbedder | None = None
 
 
-@router.post("/ask", response_model=FAQAnswer)
-async def ask(req: FAQAskRequest) -> FAQAnswer:
-    """Return top-1 FAQ answer with similarity score."""
+@router.on_event("startup")
+async def _warm_faq_state() -> None:
+    global _FAQS, _DOC_EMB, _EMBEDDER
+    # Only initialise if not already set (helps tests that monkeypatch state)
+    if _FAQS is None or _DOC_EMB is None:
+        _FAQS = load_faqs()
+        qs = [f.question for f in _FAQS]
+        _DOC_EMB, used_cache = load_or_build_embeddings(qs)
+        _EMBEDDER = None if used_cache else MiniLMEmbedder()
+
+
+@router.post(
+    "/ask",
+    response_model=FAQAnswer | FAQHandoff,  # can return either shape
+)
+async def ask(req: FAQAskRequest):
+    # init-on-first-call fallback (for tests that don’t run startup)
+    global _FAQS, _DOC_EMB, _EMBEDDER
+    if _FAQS is None or _DOC_EMB is None:
+        await _warm_faq_state()  # type: ignore[misc]
+
     if _EMBEDDER is None:
-        # If embeddings were loaded from cache, we still need an encoder for the query.
         q_emb = MiniLMEmbedder().encode([req.question])[0]
     else:
         q_emb = _EMBEDDER.encode([req.question])[0]
 
-    idx, score = cosine_top1(q_emb, _DOC_EMB)
-    item = _FAQS[idx]
+    idx, cosine = cosine_top1(q_emb, _DOC_EMB)  # type: ignore[arg-type]
+    score = score_from_cosine(cosine)
+
+    # Threshold check
+    if score < settings.faq_confidence_threshold:
+        # Prepare minimal context for the email
+        item = _FAQS[idx]  # type: ignore[index]
+        ctx = FAQContext(id=item.id, question=item.question, answer=item.answer)
+        # Fire-and-forget: we call synchronously here (simple & OK for dev);
+        # could switch to BackgroundTasks later.
+        _ = send_handoff_email(
+            settings=settings,
+            user_question=req.question,
+            top_faq=ctx,
+            score=score,
+            threshold=settings.faq_confidence_threshold,
+        )
+        return FAQHandoff(handoff=True, score=score, question=req.question)
+
+    # Confident -> return curated answer
+    item = _FAQS[idx]  # type: ignore[index]
     return FAQAnswer(answer=item.answer, score=score, source_id=item.id)

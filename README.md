@@ -94,7 +94,7 @@ before executing tests to ensure the schema is always up to date.
 
 See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
 
-## FAQ BOT (V1)
+### FAQ BOT (V1)
 
 The FAQ Bot is a minimal retrieval-based assistant. It loads a small set of curated FAQs `from data/faqs.yaml`, encodes them into embeddings, and serves answers through a FastAPI endpoint.
 This approach keeps costs at zero (no paid APIs) and ensures deterministic behaviour. If a question is close enough to one of the stored FAQs, the corresponding answer is returned.
@@ -132,6 +132,28 @@ curl -X POST http://localhost:8000/faq/ask \
 -   **Retrieval:** Cosine similarity is used to find the closest match.
 -   **API contract:** `POST /faq/ask` with a question returns the best-matched FAQ answer.
 -   **Tests:** Unit and integration tests validate retrieval behaviour without requiring external services.
+
+### Confidence and fallback
+
+Each FAQ answer is returned with a **confidence score** between 0 and 1.  
+This score is derived from cosine similarity and normalised by `(cosine + 1) / 2`.
+
+-   If the score is **greater than or equal to** the configured threshold (`FAQ_CONFIDENCE_THRESHOLD`, default `0.60`), the FAQ Bot returns the curated answer and its source id.
+-   If the score is **below** the threshold, the bot does **not** guess. Instead, it:
+    1. Returns a `handoff` response in the API output.
+    2. Triggers an **email notification** (via SMTP, e.g. MailHog in local dev) containing:
+        - The user’s original question
+        - The closest FAQ match (id, question, answer)
+        - The score and threshold values
+
+This design ensures graceful fallback: users aren’t misled by low-confidence answers, and humans stay in the loop for questions outside the curated set.
+
+**Local email (MailHog):**
+
+```bash
+docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog
+open http://localhost:8025
+```
 
 ## Branching & PRs (modern Git)
 
