@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from src.api.routes.bookings import router as bookings_router
+from src.api.routes.faq import router as faq_router  # NEW
 from src.config.settings import get_settings
 from src.db.session import dispose_engine, engine
 
@@ -37,8 +38,10 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Hybrid AI Platform", lifespan=lifespan)
+
     # Mount routers
     app.include_router(bookings_router)
+    app.include_router(faq_router)  # NEW
 
     @app.get("/health")
     async def health() -> Dict[str, Any]:

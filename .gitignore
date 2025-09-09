@@ -41,3 +41,8 @@ coverage/
 # Data artifacts
 data/
 !data/.gitkeep
+# Allow curated seed data to be versioned
+!data/faqs.yaml
+
+# Ignore generated embeddings (commit only if explicitly needed)
+data/*.npy
