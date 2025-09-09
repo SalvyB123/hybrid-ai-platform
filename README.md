@@ -135,8 +135,18 @@ curl -X POST http://localhost:8000/faq/ask \
 
 ### Confidence and fallback
 
-The service normalises cosine similarity to `[0,1]` and compares it with `FAQ_CONFIDENCE_THRESHOLD` (default `0.60`).  
-If the score is below the threshold, the endpoint returns a `handoff` response and triggers an email to a human inbox.
+Each FAQ answer is returned with a **confidence score** between 0 and 1.  
+This score is derived from cosine similarity and normalised by `(cosine + 1) / 2`.
+
+-   If the score is **greater than or equal to** the configured threshold (`FAQ_CONFIDENCE_THRESHOLD`, default `0.60`), the FAQ Bot returns the curated answer and its source id.
+-   If the score is **below** the threshold, the bot does **not** guess. Instead, it:
+    1. Returns a `handoff` response in the API output.
+    2. Triggers an **email notification** (via SMTP, e.g. MailHog in local dev) containing:
+        - The user’s original question
+        - The closest FAQ match (id, question, answer)
+        - The score and threshold values
+
+This design ensures graceful fallback: users aren’t misled by low-confidence answers, and humans stay in the loop for questions outside the curated set.
 
 **Local email (MailHog):**
 
