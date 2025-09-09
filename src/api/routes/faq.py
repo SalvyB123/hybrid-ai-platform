@@ -21,10 +21,12 @@ _EMBEDDER: MiniLMEmbedder | None = None
 @router.on_event("startup")
 async def _warm_faq_state() -> None:
     global _FAQS, _DOC_EMB, _EMBEDDER
-    _FAQS = load_faqs()
-    qs = [f.question for f in _FAQS]
-    _DOC_EMB, used_cache = load_or_build_embeddings(qs)
-    _EMBEDDER = None if used_cache else MiniLMEmbedder()
+    # Only initialise if not already set (helps tests that monkeypatch state)
+    if _FAQS is None or _DOC_EMB is None:
+        _FAQS = load_faqs()
+        qs = [f.question for f in _FAQS]
+        _DOC_EMB, used_cache = load_or_build_embeddings(qs)
+        _EMBEDDER = None if used_cache else MiniLMEmbedder()
 
 
 @router.post(
