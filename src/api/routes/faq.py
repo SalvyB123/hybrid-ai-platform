@@ -8,6 +8,7 @@ from src.ai.faq.embedder import load_or_build_embeddings, MiniLMEmbedder
 from src.ai.faq.retriever import cosine_top1, score_from_cosine
 from src.api.schemas.faq import FAQAskRequest, FAQAnswer, FAQHandoff
 from src.config.settings import get_settings
+from src.ai.faq.notify import send_handoff_email, FAQContext
 
 router = APIRouter(prefix="/faq", tags=["faq"])
 settings = get_settings()
@@ -49,7 +50,18 @@ async def ask(req: FAQAskRequest):
 
     # Threshold check
     if score < settings.faq_confidence_threshold:
-        # Below confidence -> return handoff signal for next step (SMTP)
+        # Prepare minimal context for the email
+        item = _FAQS[idx]  # type: ignore[index]
+        ctx = FAQContext(id=item.id, question=item.question, answer=item.answer)
+        # Fire-and-forget: we call synchronously here (simple & OK for dev);
+        # could switch to BackgroundTasks later.
+        _ = send_handoff_email(
+            settings=settings,
+            user_question=req.question,
+            top_faq=ctx,
+            score=score,
+            threshold=settings.faq_confidence_threshold,
+        )
         return FAQHandoff(handoff=True, score=score, question=req.question)
 
     # Confident -> return curated answer
