@@ -51,10 +51,9 @@ async def test_faq_ask_below_threshold_triggers_handoff(monkeypatch):
 async def test_faq_ask_below_threshold_triggers_email(monkeypatch):
     """
     When score < threshold, the router should invoke the email helper.
-    We spy on send_handoff_email and assert it is called exactly once.
+    We spy on the *router's imported symbol* to ensure the call happens.
     """
     import src.api.routes.faq as faq_mod
-    import src.ai.faq.notify as notify_mod
 
     # Fake embedder: query vector is [1, 0]
     class FakeEmbedder:
@@ -66,20 +65,20 @@ async def test_faq_ask_below_threshold_triggers_email(monkeypatch):
     # cos ~ 0.5 -> score 0.75
     doc_emb = np.array([[0.5, 0.8660254]], dtype="float32")  # already L2-normalised
 
-    # Patch router state
+    # Patch router state and threshold
     monkeypatch.setattr(faq_mod, "_FAQS", faqs, raising=False)
     monkeypatch.setattr(faq_mod, "_DOC_EMB", doc_emb, raising=False)
     monkeypatch.setattr(faq_mod, "_EMBEDDER", FakeEmbedder(), raising=False)
     monkeypatch.setattr(faq_mod.settings, "faq_confidence_threshold", 0.95, raising=False)
 
-    # Spy on the email sender
+    # Spy on the *router's* imported function, not the source module
     calls = {"n": 0}
 
     def fake_send_handoff_email(*args, **kwargs):
         calls["n"] += 1
         return True
 
-    monkeypatch.setattr(notify_mod, "send_handoff_email", fake_send_handoff_email, raising=False)
+    monkeypatch.setattr(faq_mod, "send_handoff_email", fake_send_handoff_email, raising=False)
 
     transport = ASGITransport(app=app)
     async with LifespanManager(app):
