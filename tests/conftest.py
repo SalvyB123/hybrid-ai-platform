@@ -6,6 +6,7 @@ import smtplib
 from collections.abc import AsyncGenerator
 
 import pytest
+import pytest_asyncio
 from alembic import command
 from alembic.config import Config
 from asgi_lifespan import LifespanManager
@@ -91,13 +92,7 @@ async def _drop_database() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.fixture(scope="session")
-def anyio_backend():
-    # Ensure AnyIO/pytest-asyncio use asyncio
-    return "asyncio"
-
-
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def test_engine() -> AsyncGenerator[AsyncEngine, None]:
     """
     Session-scoped async engine bound to the test database.
@@ -112,7 +107,7 @@ async def test_engine() -> AsyncGenerator[AsyncEngine, None]:
         await _drop_database()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def apply_migrations(test_engine: AsyncEngine):
     """
     Run Alembic migrations to head against the test DB.
@@ -149,7 +144,7 @@ async def apply_migrations(test_engine: AsyncEngine):
     return True
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_session(
     test_engine: AsyncEngine, apply_migrations
 ) -> AsyncGenerator[AsyncSession, None]:
@@ -165,7 +160,7 @@ async def db_session(
             await session.rollback()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """
     FastAPI client with dependency override so requests use the test session
@@ -182,6 +177,16 @@ async def test_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, N
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             yield client
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create an event loop for the entire test session."""
+    loop = asyncio.new_event_loop()
+    try:
+        yield loop
+    finally:
+        loop.close()
 
 
 # --- Global safety: never touch real SMTP in tests ---
