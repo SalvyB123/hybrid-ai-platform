@@ -9,6 +9,8 @@ from src.ai.faq.retriever import cosine_top1, score_from_cosine
 from src.api.schemas.faq import FAQAskRequest, FAQAnswer, FAQHandoff
 from src.config.settings import get_settings
 from src.ai.faq.notify import send_handoff_email, FAQContext
+from src.ai.faq.decision import should_handoff
+
 
 router = APIRouter(prefix="/faq", tags=["faq"])
 settings = get_settings()
@@ -49,12 +51,9 @@ async def ask(req: FAQAskRequest):
     score = score_from_cosine(cosine)
 
     # Threshold check
-    if score < settings.faq_confidence_threshold:
-        # Prepare minimal context for the email
+    if should_handoff(score, settings.faq_confidence_threshold):  # CHANGED
         item = _FAQS[idx]  # type: ignore[index]
         ctx = FAQContext(id=item.id, question=item.question, answer=item.answer)
-        # Fire-and-forget: we call synchronously here (simple & OK for dev);
-        # could switch to BackgroundTasks later.
         _ = send_handoff_email(
             settings=settings,
             user_question=req.question,
