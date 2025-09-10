@@ -30,9 +30,10 @@ async def create_booking(
 ):
     """Create a booking. DB assigns timestamps; we default status to 'pending'."""
     obj = Booking(
+        customer_name=payload.customer_name,
         customer_email=payload.customer_email,
-        start_time=payload.starts_at,
-        end_time=payload.ends_at,
+        starts_at=payload.starts_at,
+        ends_at=payload.ends_at,
         status=BookingStatus.pending,
         notes=payload.notes,
     )
@@ -83,12 +84,6 @@ async def update_booking(
 
     # Dump only provided fields
     data = payload.model_dump(exclude_unset=True)
-
-    # Map API schema fields -> DB model fields
-    if "starts_at" in data:
-        data["start_time"] = data.pop("starts_at")
-    if "ends_at" in data:
-        data["end_time"] = data.pop("ends_at")
 
     # Apply changes
     for field, value in data.items():
