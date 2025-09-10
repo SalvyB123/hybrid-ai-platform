@@ -1,7 +1,8 @@
-pytest
+# Dev/test tools (pinned to keep CI == local)
+pytest==8.3.2
+pytest-asyncio==0.23.8
+httpx==0.27.2
+asgi-lifespan==2.1.0
+coverage==7.6.1
 ruff==0.6.9
-coverage
-pytest>=8.0
-pytest-asyncio>=0.23
-httpx>=0.27
-asgi-lifespan>=2.1
+black==24.8.0
