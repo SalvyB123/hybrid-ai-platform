@@ -1,8 +1,9 @@
 import types
+
 import numpy as np
 import pytest
-from httpx import AsyncClient, ASGITransport
 from asgi_lifespan import LifespanManager
+from httpx import ASGITransport, AsyncClient
 
 from src.api.app import app
 

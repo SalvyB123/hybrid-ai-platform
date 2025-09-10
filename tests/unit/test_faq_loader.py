@@ -1,5 +1,6 @@
-from pathlib import Path
 import textwrap
+from pathlib import Path
+
 from src.ai.faq.data_loader import load_faqs
 
 

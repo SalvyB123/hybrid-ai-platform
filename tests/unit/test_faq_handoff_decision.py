@@ -1,5 +1,6 @@
 import pytest
-from src.ai.faq.decision import should_handoff, clamp01
+
+from src.ai.faq.decision import clamp01, should_handoff
 
 
 @pytest.mark.parametrize(

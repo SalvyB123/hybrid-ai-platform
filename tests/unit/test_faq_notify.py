@@ -1,4 +1,4 @@
-from src.ai.faq.notify import send_handoff_email, FAQContext
+from src.ai.faq.notify import FAQContext, send_handoff_email
 from src.config.settings import Settings
 
 

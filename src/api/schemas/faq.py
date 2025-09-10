@@ -1,7 +1,8 @@
 from __future__ import annotations
-from pydantic import BaseModel
+
 from typing import Annotated
-from pydantic import StringConstraints
+
+from pydantic import BaseModel, StringConstraints
 
 Question = Annotated[str, StringConstraints(min_length=1, max_length=500)]
 

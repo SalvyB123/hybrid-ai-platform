@@ -199,8 +199,7 @@ def _mock_smtp_and_email_handoff(monkeypatch):
         os.environ.pop(k, None)
 
     class _DummySMTP:
-        def __init__(self, *a, **kw):
-            ...
+        def __init__(self, *a, **kw): ...
 
         def __enter__(self):
             return self

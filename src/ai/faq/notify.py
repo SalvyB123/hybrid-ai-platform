@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import smtplib
-from email.message import EmailMessage
 from dataclasses import dataclass
+from email.message import EmailMessage
 
 from src.config.settings import Settings
 

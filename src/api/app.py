@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI
 from sqlalchemy import text
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(faq_router)  # NEW
 
     @app.get("/health")
-    async def health() -> Dict[str, Any]:
+    async def health() -> dict[str, Any]:
         """
         Basic health endpoint:
         - reports environment

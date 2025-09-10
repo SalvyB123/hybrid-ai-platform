@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from pydantic import field_validator, ValidationInfo
+
+from pydantic import ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

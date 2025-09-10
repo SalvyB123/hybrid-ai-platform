@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
 import numpy as np
+from fastapi import APIRouter
 
 from src.ai.faq.data_loader import load_faqs
-from src.ai.faq.embedder import load_or_build_embeddings, MiniLMEmbedder
-from src.ai.faq.retriever import cosine_top1, score_from_cosine
-from src.api.schemas.faq import FAQAskRequest, FAQAnswer, FAQHandoff
-from src.config.settings import get_settings
-from src.ai.faq.notify import send_handoff_email, FAQContext
 from src.ai.faq.decision import should_handoff
-
+from src.ai.faq.embedder import MiniLMEmbedder, load_or_build_embeddings
+from src.ai.faq.notify import FAQContext, send_handoff_email
+from src.ai.faq.retriever import cosine_top1, score_from_cosine
+from src.api.schemas.faq import FAQAnswer, FAQAskRequest, FAQHandoff
+from src.config.settings import get_settings
 
 router = APIRouter(prefix="/faq", tags=["faq"])
 settings = get_settings()
