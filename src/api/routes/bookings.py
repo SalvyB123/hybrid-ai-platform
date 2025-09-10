@@ -54,12 +54,12 @@ async def get_booking(
 @router.get("", response_model=list[BookingOut])
 async def list_bookings(
     db: Annotated[AsyncSession, Depends(get_db)],
-    limit: Annotated[int, Query(50, ge=1, le=200)] = 50,
-    offset: Annotated[int, Query(0, ge=0)] = 0,
-    email: Annotated[str | None, Query(None, description="Filter by customer email")] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    email: Annotated[str | None, Query(description="Filter by customer email")] = None,
     status_: Annotated[
         BookingStatus | None,
-        Query(None, alias="status", description="Filter by status"),
+        Query(alias="status", description="Filter by status"),
     ] = None,
 ):
     """List bookings with simple pagination and optional filters."""
