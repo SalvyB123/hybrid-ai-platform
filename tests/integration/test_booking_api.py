@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_create_list_read_update_delete_booking(test_client: AsyncClient):
     # Create
     now = datetime.now(UTC).replace(microsecond=0)
