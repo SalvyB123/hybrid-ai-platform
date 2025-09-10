@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import AsyncGenerator
-
 import smtplib
+from collections.abc import AsyncGenerator
+
 import pytest
-from httpx import AsyncClient, ASGITransport
+from alembic import command
+from alembic.config import Config
+from asgi_lifespan import LifespanManager
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -15,14 +18,9 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from asgi_lifespan import LifespanManager
-from alembic import command
-from alembic.config import Config
-
 from src.api.app import create_app
-from src.db.session import get_db
 from src.config.settings import Settings
-
+from src.db.session import get_db
 
 # ---------------------------------------------------------------------------
 # Configuration

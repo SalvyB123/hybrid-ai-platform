@@ -14,9 +14,12 @@ target-version = ["py311"]
 
 [tool.ruff]
 line-length = 100
+target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F"]  # basic errors/flake8 rules
+select = ["E","F","I","B","UP"]  # adjust to your taste
+
+[tool.ruff.format]
 
 [tool.coverage.run]
 branch = true
