@@ -1,2 +1,3 @@
-def test_placeholder():
-    assert 1 + 1 == 2
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Placeholder disabled to avoid AnyIO teardown noise")

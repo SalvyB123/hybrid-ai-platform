@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import numpy as np
 
 _MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"

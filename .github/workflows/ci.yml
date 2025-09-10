@@ -60,7 +60,7 @@ jobs:
             - name: Lint
               run: |
                   ruff check .
-                  black --check --diff .
+                  python -m black --check --diff .
 
             # Ensure DB is healthy before running migrations
             - name: Wait for database

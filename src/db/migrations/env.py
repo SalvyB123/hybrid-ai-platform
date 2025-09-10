@@ -7,9 +7,9 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from src.db.session import Base  # Base.metadata must exist for autogenerate
-from src.db import models  # noqa: F401  # ensure models are imported for autogenerate
 from src.config.settings import Settings
+from src.db import models  # noqa: F401  # ensure models are imported for autogenerate
+from src.db.session import Base  # Base.metadata must exist for autogenerate
 
 # Alembic Config
 config = context.config

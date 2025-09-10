@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
 import numpy as np
+from fastapi import APIRouter
 
 from src.ai.faq.data_loader import load_faqs
-from src.ai.faq.embedder import load_or_build_embeddings, MiniLMEmbedder
+from src.ai.faq.decision import should_handoff
+from src.ai.faq.embedder import MiniLMEmbedder, load_or_build_embeddings
+from src.ai.faq.notify import FAQContext, send_handoff_email
 from src.ai.faq.retriever import cosine_top1, score_from_cosine
-from src.api.schemas.faq import FAQAskRequest, FAQAnswer, FAQHandoff
+from src.api.schemas.faq import FAQAnswer, FAQAskRequest, FAQHandoff
 from src.config.settings import get_settings
-from src.ai.faq.notify import send_handoff_email, FAQContext
 
 router = APIRouter(prefix="/faq", tags=["faq"])
 settings = get_settings()
@@ -49,12 +50,9 @@ async def ask(req: FAQAskRequest):
     score = score_from_cosine(cosine)
 
     # Threshold check
-    if score < settings.faq_confidence_threshold:
-        # Prepare minimal context for the email
+    if should_handoff(score, settings.faq_confidence_threshold):  # CHANGED
         item = _FAQS[idx]  # type: ignore[index]
         ctx = FAQContext(id=item.id, question=item.question, answer=item.answer)
-        # Fire-and-forget: we call synchronously here (simple & OK for dev);
-        # could switch to BackgroundTasks later.
         _ = send_handoff_email(
             settings=settings,
             user_question=req.question,

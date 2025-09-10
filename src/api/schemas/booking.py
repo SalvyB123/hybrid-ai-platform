@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, model_validator
@@ -10,7 +9,7 @@ class BookingBase(BaseModel):
     customer_email: EmailStr
     starts_at: datetime
     ends_at: datetime
-    notes: Optional[str] = None
+    notes: str | None = None
 
     # Pydantic v2 cross-field validation
     @model_validator(mode="after")
@@ -25,11 +24,11 @@ class BookingCreate(BookingBase):
 
 
 class BookingUpdate(BaseModel):
-    customer_name: Optional[str] = None
-    customer_email: Optional[EmailStr] = None
-    starts_at: Optional[datetime] = None
-    ends_at: Optional[datetime] = None
-    notes: Optional[str] = None
+    customer_name: str | None = None
+    customer_email: EmailStr | None = None
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    notes: str | None = None
 
     @model_validator(mode="after")
     def _check_times_if_both_present(self):

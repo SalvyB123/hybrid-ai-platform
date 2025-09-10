@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from pydantic import ValidationError
 
@@ -6,7 +7,7 @@ from src.api.schemas.booking import BookingCreate
 
 
 def test_booking_create_valid():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     later = now + timedelta(hours=1)
     b = BookingCreate(
         customer_name="Alice",
@@ -19,7 +20,7 @@ def test_booking_create_valid():
 
 
 def test_booking_create_invalid_time_order():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     earlier = now - timedelta(minutes=10)
     with pytest.raises(ValidationError):
         BookingCreate(
