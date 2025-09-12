@@ -10,11 +10,22 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 
 def _get_async_db_url() -> str:
+
     url = os.getenv("DATABASE_URL") or os.getenv("DATABASE_ASYNC_URL")
     if not url:
-        raise RuntimeError("DATABASE_URL (or DATABASE_ASYNC_URL) is not set in the environment.")
+        # Try app settings as fallback
+        try:
+            from src.config.settings import get_settings
+
+            url = get_settings().app_db_url  # may already be async
+        except Exception:
+            # Final fallback for CI/local: Postgres service defaults
+            url = "postgresql+asyncpg://postgres:postgres@localhost:5432/appdb"
+
+    # Ensure async driver
     if url.startswith("postgresql://"):
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
     return url
 
 
