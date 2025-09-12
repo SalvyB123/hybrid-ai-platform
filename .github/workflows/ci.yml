@@ -26,9 +26,12 @@ jobs:
                     --health-retries=10
 
         env:
-            # If your Settings() accepts a full async URL, this is sufficient:
+            # Canonical DSNs (used by tests and Alembic env.py)
+            DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/app
+            DATABASE_ASYNC_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/app
+
+            # Existing app settings (kept for compatibility with your Settings)
             APP_DB_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/app
-            # If your Settings() assembles the URL from parts, these help as well:
             APP_DB_HOST: localhost
             APP_DB_PORT: 5432
             APP_DB_USER: postgres
@@ -41,6 +44,11 @@ jobs:
             - uses: actions/setup-python@v5
               with:
                   python-version: "3.11"
+
+            - name: Install system deps (pg_isready)
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y postgresql-client
 
             - name: Cache pip
               uses: actions/cache@v4
@@ -56,21 +64,18 @@ jobs:
                   pip install -r requirements.txt
                   pip install -r requirements-dev.txt
 
-            # Keep your quality gates
             - name: Lint
               run: |
                   ruff check .
                   python -m black --check --diff .
 
-            # Ensure DB is healthy before running migrations
             - name: Wait for database
               run: |
                   for i in {1..30}; do
-                    pg_isready -h localhost -p 5432 -U postgres && break
+                    pg_isready -h localhost -p 5432 -U postgres -d app && break
                     sleep 2
                   done
 
-            # Run Alembic migrations BEFORE tests
             - name: Run migrations
               run: python -m alembic upgrade head
 
