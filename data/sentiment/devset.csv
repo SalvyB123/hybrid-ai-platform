@@ -1,0 +1,13 @@
+id,text,gold_label
+1,"This tool is fantastic and saved me hours!",positive
+2,"Awful experience, the bot kept looping.",negative
+3,"It's okay, nothing special.",neutral
+4,"Setup was quick, support was helpful.",positive
+5,"Setup was quick… not.",negative
+6,"I thought it would be faster.",negative
+7,"No issues so far.",positive
+8,"Works, but I had to retry twice.",neutral
+9,"Absolutely love the new dashboard!",positive
+10,"I can’t recommend this as it failed twice.",negative
+11,"The response was fine.",neutral
+12,"Great value once you get past the clunky onboarding.",positive
