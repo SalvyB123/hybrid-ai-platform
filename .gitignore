@@ -43,6 +43,7 @@ data/
 !data/.gitkeep
 # Allow curated seed data to be versioned
 !data/faqs.yaml
+!data/sentiment/devset.csv
 
 # Ignore generated embeddings (commit only if explicitly needed)
 data/*.npy
