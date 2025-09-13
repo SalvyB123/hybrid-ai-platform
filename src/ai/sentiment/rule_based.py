@@ -124,6 +124,10 @@ def classify(
     flips = _windowed_negation(text, POS, window=4)
     if flips:
         score -= pos_weight * flips  # invert previously added positive weights
+        # Bias explicit negations slightly negative so they don't collapse to neutral.
+        # Ensure we cross the neutral_band deterministically.
+        negation_bias = max(0.25, neutral_band + 0.05)
+        score -= negation_bias
 
     # Concession / hedge dampening
     hedges = _count_hits(t, NEUTRAL_HINTS)
