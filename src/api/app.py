@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from src.api.routes.bookings import router as bookings_router
-from src.api.routes.faq import router as faq_router  # NEW
+from src.api.routes.faq import router as faq_router
+from src.api.routes.sentiment import router as sentiment_router
 from src.config.settings import get_settings
 from src.db.session import dispose_engine, engine
 
@@ -41,7 +42,8 @@ def create_app() -> FastAPI:
 
     # Mount routers
     app.include_router(bookings_router)
-    app.include_router(faq_router)  # NEW
+    app.include_router(faq_router)
+    app.include_router(sentiment_router)
 
     @app.get("/health")
     async def health() -> dict[str, Any]:
