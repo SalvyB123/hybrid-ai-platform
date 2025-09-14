@@ -11,10 +11,14 @@ DOWNGRADE_TARGET_BEFORE_SENTIMENT = "1130532299a8"
 
 
 def _get_async_db_url() -> str:
+
     url = os.getenv("DATABASE_URL") or os.getenv("DATABASE_ASYNC_URL")
-    if not url:
-        raise RuntimeError("DATABASE_URL (or DATABASE_ASYNC_URL) is not set in the environment.")
-    return url
+    if url:
+        return url
+    # Fallback to app settings (works in local dev)
+    from src.config.settings import get_settings
+
+    return get_settings().app_db_url
 
 
 def test_sentiment_migration_upgrade_downgrade_roundtrip():
