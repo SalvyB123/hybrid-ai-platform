@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from src.api.routes.bookings import router as bookings_router
@@ -39,6 +40,18 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Hybrid AI Platform", lifespan=lifespan)
+
+    # --- CORS: explicit allow-list (enterprise default) ---
+    # Allows your dev frontend (e.g. http://localhost:5173) and can be
+    # tightened per environment via APP_CORS_ALLOWED_ORIGINS.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allowed_origins,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+        allow_credentials=True,
+        max_age=600,
+    )
 
     # Mount routers
     app.include_router(bookings_router)

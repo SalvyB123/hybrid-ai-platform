@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     smtp_from: str | None = None  # e.g. "bot@local.test"
     handoff_to: str | None = None  # e.g. "founder@local.test"
 
+    # --- CORS ---
+    # Comma-separated list of allowed origins, e.g. "http://localhost:5173,http://127.0.0.1:5173"
+    cors_allowed_origins: list[str] = ["http://localhost:5173"]
+
     # --- Settings config ---
     model_config = SettingsConfigDict(
         env_file=".env",
