@@ -2,7 +2,7 @@ import pytest
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
 
-from src.app import app
+from src.api.app import app
 
 
 @pytest.mark.asyncio
