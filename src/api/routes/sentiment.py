@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated  # add this import
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.ai.sentiment import classify
@@ -21,17 +21,15 @@ router = APIRouter(prefix="/sentiment", tags=["sentiment"])
 )
 async def create_sentiment(
     payload: SentimentRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],  # <-- no default call; satisfies B008
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> SentimentResponse:
+    # Input validation (min/max length) is handled by SentimentRequest
     text = payload.text.strip()
-    if not text:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Text must not be empty.",
-        )
 
+    # Classify
     result = classify(text)
 
+    # Persist
     row = Sentiment(text=text, score=result.score, label=result.label)
     db.add(row)
     await db.flush()
