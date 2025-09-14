@@ -9,12 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # --- FAQ Bot ---
-    # Confidence threshold in [0,1]
     faq_confidence_threshold: float = 0.60
 
     # --- General ---
-    app_env: str = "local"  # maps from APP_ENV (case-insensitive)
-    debug: bool = True  # maps from DEBUG
+    app_env: str = "local"
+    debug: bool = True
 
     # --- Database ---
     app_db_user: str = "appuser"
@@ -24,31 +23,30 @@ class Settings(BaseSettings):
     app_db_port: int = 5432
     app_db_url: str | None = None  # optional override (takes precedence)
 
-    # --- Optional pgAdmin (docker compose) ---
+    # --- Optional pgAdmin ---
     pgadmin_email: str | None = None
     pgadmin_password: str | None = None
 
-    # --- Email handoff (used in the next task; safe to keep default/None now) ---
-    smtp_host: str | None = None  # e.g. "localhost" for MailHog
-    smtp_port: int | None = None  # e.g. 1025 for MailHog
-    smtp_from: str | None = None  # e.g. "bot@local.test"
-    handoff_to: str | None = None  # e.g. "founder@local.test"
+    # --- Email handoff ---
+    smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_from: str | None = None
+    handoff_to: str | None = None
 
     # --- CORS ---
-    # Comma-separated list of allowed origins, e.g. "http://localhost:5173,http://127.0.0.1:5173"
+    # Accepts either JSON (["http://a","http://b"]) or comma-separated (http://a,http://b)
     cors_allowed_origins: list[str] = ["http://localhost:5173"]
 
     # --- Settings config ---
     model_config = SettingsConfigDict(
         env_file=".env",
-        case_sensitive=False,  # allow APP_ENV or app_env etc.
-        extra="ignore",  # ignore unknown env vars
+        case_sensitive=False,
+        extra="ignore",
     )
 
     @field_validator("app_db_url", mode="before")
     @classmethod
     def assemble_db_url(cls, v: str | None, info: ValidationInfo) -> str:
-        """If APP_DB_URL is not provided, build it from the individual parts."""
         if v:
             return v
         data = info.data
@@ -58,6 +56,28 @@ class Settings(BaseSettings):
         port = data.get("app_db_port", 5432)
         name = data.get("app_db_name", "appdb")
         return f"postgresql+asyncpg://{user}:{pw}@{host}:{port}/{name}"
+
+    @field_validator("cors_allowed_origins", mode="before")
+    @classmethod
+    def parse_origins(cls, v):
+        """
+        Allow both JSON arrays and comma-separated strings for env input.
+        pydantic-settings will already try JSON; if that fails or it's a plain string,
+        handle comma-separated gracefully.
+        """
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            # If someone passed a JSON array string, leave it to the JSON parser upstream.
+            # But if we get here as a plain string, split on commas.
+            if v.strip().startswith("["):
+                return v  # let the built-in JSON parsing handle it
+            # comma-separated
+            parts = [s.strip() for s in v.split(",") if s.strip()]
+            return parts or ["http://localhost:5173"]
+        return v
 
 
 @lru_cache
