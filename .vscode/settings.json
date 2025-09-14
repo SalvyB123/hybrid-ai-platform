@@ -1,0 +1,16 @@
+{
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"],
+  "black-formatter.args": ["--line-length", "100"],
+
+  // --- Added for import resolution ---
+  "python.analysis.extraPaths": ["."],
+  "python.envFile": "${workspaceFolder}/.env"
+}

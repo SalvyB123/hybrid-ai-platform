@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field
 
 
 class SentimentRequest(BaseModel):
-    text: str = Field(..., min_length=1, description="Input text to analyse")
+    # Enforce basic limits to prevent abuse and make validation deterministic
+    text: str = Field(..., min_length=1, max_length=2000)
 
 
 class SentimentResponse(BaseModel):

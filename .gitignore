@@ -30,7 +30,9 @@ yarn-error.log*
 docker-data/
 
 # VSCode
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Mypy / pytest
 .mypy_cache/
@@ -49,3 +51,10 @@ data/
 
 # Ignore generated embeddings (commit only if explicitly needed)
 data/*.npy
+
+# TypeScript build info
+frontend/**/*.tsbuildinfo
+
+# Vite config artefacts from tsc -b
+frontend/vite.config.d.ts
+frontend/vite.config.js

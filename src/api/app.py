@@ -4,11 +4,15 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from src.api.errors import install_error_handlers
+from src.api.middleware.request_context import RequestContextMiddleware
 from src.api.routes.bookings import router as bookings_router
 from src.api.routes.faq import router as faq_router
 from src.api.routes.sentiment import router as sentiment_router
+from src.common.json_logging import setup_json_logging
 from src.config.settings import get_settings
 from src.db.session import dispose_engine, engine
 
@@ -22,6 +26,9 @@ async def lifespan(app: FastAPI):
     - Startup: (hook for warmups, migrations triggers, cache, etc.)
     - Shutdown: dispose SQLAlchemy engine cleanly.
     """
+    # Configure JSON logging once
+    setup_json_logging(level="INFO" if not settings.debug else "DEBUG")
+
     # --- startup work (optional) ---
     try:
         async with engine.connect() as conn:
@@ -40,10 +47,26 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(title="Hybrid AI Platform", lifespan=lifespan)
 
+    # --- Request context / access logs ---
+    app.add_middleware(RequestContextMiddleware)
+
+    # --- CORS: explicit allow-list (enterprise default) ---
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allowed_origins,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+        allow_credentials=True,
+        max_age=600,
+    )
+
     # Mount routers
     app.include_router(bookings_router)
     app.include_router(faq_router)
     app.include_router(sentiment_router)
+
+    # Error handlers (consistent JSON envelope)
+    install_error_handlers(app)
 
     @app.get("/health")
     async def health() -> dict[str, Any]:

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Annotated  # add this import
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.ai.sentiment import classify
@@ -21,8 +22,13 @@ router = APIRouter(prefix="/sentiment", tags=["sentiment"])
 )
 async def create_sentiment(
     payload: SentimentRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],  # <-- no default call; satisfies B008
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> SentimentResponse:
+    """
+    Classify the sentiment of the provided text and persist the result.
+    Rolls back and returns 500 on DB failures so the global error handler
+    can wrap the response in the standard error envelope.
+    """
     text = payload.text.strip()
     if not text:
         raise HTTPException(
@@ -31,11 +37,18 @@ async def create_sentiment(
         )
 
     result = classify(text)
-
     row = Sentiment(text=text, score=result.score, label=result.label)
     db.add(row)
-    await db.flush()
-    await db.commit()
-    await db.refresh(row)
 
+    try:
+        await db.flush()
+        await db.commit()
+    except SQLAlchemyError as err:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to persist sentiment result.",
+        ) from err
+
+    await db.refresh(row)
     return SentimentResponse(id=row.id, text=row.text, score=row.score, label=row.label)
