@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import os
 
@@ -8,24 +6,14 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy.ext.asyncio import create_async_engine
 
+# The revision that *precedes* the sentiment table creation (bookings revision)
+DOWNGRADE_TARGET_BEFORE_SENTIMENT = "1130532299a8"
+
 
 def _get_async_db_url() -> str:
-
     url = os.getenv("DATABASE_URL") or os.getenv("DATABASE_ASYNC_URL")
     if not url:
-        # Try app settings as fallback
-        try:
-            from src.config.settings import get_settings
-
-            url = get_settings().app_db_url  # may already be async
-        except Exception:
-            # Final fallback for CI/local: Postgres service defaults
-            url = "postgresql+asyncpg://postgres:postgres@localhost:5432/appdb"
-
-    # Ensure async driver
-    if url.startswith("postgresql://"):
-        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-
+        raise RuntimeError("DATABASE_URL (or DATABASE_ASYNC_URL) is not set in the environment.")
     return url
 
 
@@ -33,7 +21,7 @@ def test_sentiment_migration_upgrade_downgrade_roundtrip():
     """
     Round-trip the latest migration that creates the 'sentiment' table:
       - upgrade head -> table exists with expected columns
-      - downgrade -1 -> table gone
+      - downgrade to the revision *before* sentiment -> table gone
       - upgrade head -> table exists again
     """
     cfg = Config()
@@ -67,14 +55,14 @@ def test_sentiment_migration_upgrade_downgrade_roundtrip():
     for expected in {"id", "text", "score", "label", "created_at"}:
         assert expected in cols, f"missing column: {expected}"
 
-    # Downgrade one revision (drops the table) and assert absence
-    command.downgrade(cfg, "-1")
+    # Downgrade to the revision BEFORE the sentiment table existed -> table dropped
+    command.downgrade(cfg, DOWNGRADE_TARGET_BEFORE_SENTIMENT)
     exists, _ = asyncio.run(table_info())
-    assert not exists, "sentiment table should be dropped after downgrade -1"
+    assert not exists, "sentiment table should be dropped after downgrade to pre-sentiment revision"
 
-    # Upgrade again and re-check
+    # Upgrade back to head and assert presence again
     command.upgrade(cfg, "head")
     exists, cols = asyncio.run(table_info())
-    assert exists, "sentiment table should exist after re-upgrade"
+    assert exists, "sentiment table should exist after upgrading back to head"
     for expected in {"id", "text", "score", "label", "created_at"}:
-        assert expected in cols
+        assert expected in cols, f"missing column after re-upgrade: {expected}"
