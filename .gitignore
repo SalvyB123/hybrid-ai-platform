@@ -49,3 +49,10 @@ data/
 
 # Ignore generated embeddings (commit only if explicitly needed)
 data/*.npy
+
+# TypeScript build info
+frontend/**/*.tsbuildinfo
+
+# Vite config artefacts from tsc -b
+frontend/vite.config.d.ts
+frontend/vite.config.js
