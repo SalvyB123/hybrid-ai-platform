@@ -30,7 +30,9 @@ yarn-error.log*
 docker-data/
 
 # VSCode
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Mypy / pytest
 .mypy_cache/
