@@ -2,12 +2,16 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "types": ["node"],
+    "outDir": "./node_modules/.cache/tsbuild/node",
+    "tsBuildInfoFile": "./node_modules/.cache/tsbuild/node.tsbuildinfo",
+
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "noEmit": false
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.*",
+    "vitest.config.*",
+    "scripts/**/*.ts"
+  ]
 }
