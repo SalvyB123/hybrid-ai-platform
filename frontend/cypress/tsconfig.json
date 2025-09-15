@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../node_modules/.cache/tsbuild/cypress",
+    "tsBuildInfoFile": "../node_modules/.cache/tsbuild/cypress.tsbuildinfo",
+
+    "noEmit": false,
+    "types": ["cypress", "@testing-library/cypress"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
