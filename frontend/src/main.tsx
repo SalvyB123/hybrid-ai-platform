@@ -1,4 +1,5 @@
 // frontend/src/main.tsx (example)
+import "@/styles/globals.css";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ProtectedRoute from "@/routes/ProtectedRoute";
