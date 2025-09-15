@@ -1,25 +1,25 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "./node_modules/.cache/tsbuild/app",
-    "tsBuildInfoFile": "./node_modules/.cache/tsbuild/app.tsbuildinfo",
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "./node_modules/.cache/tsbuild/app",
+        "tsBuildInfoFile": "./node_modules/.cache/tsbuild/app.tsbuildinfo",
 
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
+        "useDefineForClassFields": true,
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "skipLibCheck": true,
 
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": false,
-    "jsx": "react-jsx",
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "noEmit": false,
+        "jsx": "react-jsx",
 
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
-  },
-  "include": ["src"]
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedSideEffectImports": true
+    },
+    "include": ["src"]
 }
