@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import Button from "@/components/ui/button";
 import { clearToken, getToken } from "@/lib/auth";
 
 export default function DashboardPage() {
