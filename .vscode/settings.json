@@ -12,5 +12,19 @@
 
   // --- Added for import resolution ---
   "python.analysis.extraPaths": ["."],
-  "python.envFile": "${workspaceFolder}/.env"
+  "python.envFile": "${workspaceFolder}/.env",
+
+  // --- Tailwind / PostCSS awareness for the monorepo ---
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.configFile": "frontend/tailwind.config.cjs",
+  "tailwindCSS.includeLanguages": {
+    "css": "tailwindcss",
+    "postcss": "tailwindcss"
+  },
+  "tailwindCSS.emmetCompletions": true,
+
+  // Optional: if you still see false positives from the default CSS validator
+  // "css.validate": false
 }
