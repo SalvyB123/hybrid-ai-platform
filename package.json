@@ -1,0 +1,25 @@
+{
+  "name": "hybrid-ai-platform",
+  "version": "1.0.0",
+  "description": "An enterprise-ready, multi-vertical AI assistant platform. This repository starts with the **Foundations (Months 1–2)** phase and grows into the full plan.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalvyB123/hybrid-ai-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SalvyB123/hybrid-ai-platform/issues"
+  },
+  "homepage": "https://github.com/SalvyB123/hybrid-ai-platform#readme"
+}
