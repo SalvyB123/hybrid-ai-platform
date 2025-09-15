@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "cy:run": "start-server-and-test dev http://localhost:5173 'cypress run --browser chrome'"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
