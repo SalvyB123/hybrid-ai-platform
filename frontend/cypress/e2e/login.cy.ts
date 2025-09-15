@@ -16,7 +16,8 @@ describe("Login", () => {
     cy.location("pathname", { timeout: 10000 }).should("contain", "/dashboard");
     cy.window().then((win) => {
       const token = win.localStorage.getItem("auth_token");
-      expect(token, "auth token should be set in localStorage").to.be.a("string").and.not.empty;
+      expect(token, "auth token should be set in localStorage").to.be.a("string");
+      expect(token).to.have.length.greaterThan(0);
     });
   });
 });
