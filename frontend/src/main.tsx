@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     children: [
       // index route so "/" shows something instead of a blank outlet
       { index: true, element: <Dashboard /> },
-      { path: "/dashboard", element: <Dashboard /> }
+      { path: "dashboard", element: <Dashboard /> } // relative path = truly nested
     ],
   },
 ]);
