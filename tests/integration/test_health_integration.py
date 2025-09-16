@@ -3,6 +3,12 @@ from httpx import AsyncClient, ASGITransport
 
 from src.api.app import app
 
+# Force pytest-anyio to use asyncio only in this module
+pytestmark = pytest.mark.anyio("asyncio")
+
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
 
 @pytest.mark.anyio("asyncio")
 async def test_health_ok():
