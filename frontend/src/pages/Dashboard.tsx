@@ -47,7 +47,7 @@ export default function Dashboard() {
         () => [
             { name: "Positive", count: summary?.positive ?? 0 },
             { name: "Negative", count: summary?.negative ?? 0 },
-            // Add Neutral later if you want a third bar
+            // Add Neutral later if you decide to chart it as well
         ],
         [summary],
     );
