@@ -17,7 +17,10 @@ class SentimentResponse(BaseModel):
     score: float
     label: Literal["positive", "negative", "neutral"]
 
-class SentimentSummary(BaseModel):
-    positive: int
-    negative: int
-    neutral: int
+
+class SentimentSummaryResponse(BaseModel):
+    """Aggregate counts for dashboard usage."""
+    positive: int = 0
+    negative: int = 0
+    neutral: int = 0
+    total: int = 0
