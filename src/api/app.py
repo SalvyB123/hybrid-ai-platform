@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from src.api.routes import health as health_routes
 
 from src.api.errors import install_error_handlers
 from src.api.middleware.request_context import RequestContextMiddleware
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(bookings_router)
     app.include_router(faq_router)
     app.include_router(sentiment_router)
+    app.include_router(health_routes.router)
 
     # Error handlers (consistent JSON envelope)
     install_error_handlers(app)
