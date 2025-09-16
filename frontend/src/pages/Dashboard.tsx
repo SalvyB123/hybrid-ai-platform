@@ -11,46 +11,46 @@ import {
     YAxis,
 } from "recharts";
 import Spinner from "@/components/ui/spinner";
-import type { SentimentRecord } from "@/lib/api";
-import { fetchSentiments } from "@/lib/api";
+import type { SentimentSummary } from "@/lib/api";
+import { fetchSentimentSummary } from "@/lib/api";
 
 type ChartDatum = { name: string; count: number };
 
 export default function Dashboard() {
-    const [data, setData] = React.useState<SentimentRecord[] | null>(null);
+    const [summary, setSummary] = React.useState<SentimentSummary | null>(null);
     const [error, setError] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        const controller = new AbortController();
-        async function load() {
+        let alive = true;
+        (async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const items = await fetchSentiments();
-                setData(items);
+                const s = await fetchSentimentSummary();
+                if (alive) setSummary(s);
             } catch (err) {
-                setError(err instanceof Error ? err.message : "Failed to load");
+                if (alive)
+                    setError(
+                        err instanceof Error ? err.message : "Failed to load",
+                    );
             } finally {
-                setLoading(false);
+                if (alive) setLoading(false);
             }
-        }
-        load();
-        return () => controller.abort();
+        })();
+        return () => {
+            alive = false;
+        };
     }, []);
 
-    const counts = React.useMemo(() => {
-        const pos = data?.filter((d) => d.label === "positive").length ?? 0;
-        const neg = data?.filter((d) => d.label === "negative").length ?? 0;
-        // If you want to show neutral later:
-        // const neu = data?.filter(d => d.label === "neutral").length ?? 0;
-
-        const chart: ChartDatum[] = [
-            { name: "Positive", count: pos },
-            { name: "Negative", count: neg },
-        ];
-        return { chart, total: data?.length ?? 0, pos, neg };
-    }, [data]);
+    const chartData: ChartDatum[] = React.useMemo(
+        () => [
+            { name: "Positive", count: summary?.positive ?? 0 },
+            { name: "Negative", count: summary?.negative ?? 0 },
+            // Add Neutral later if you want a third bar
+        ],
+        [summary],
+    );
 
     return (
         <main className="min-h-screen bg-background text-foreground p-6">
@@ -79,31 +79,51 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {!loading && !error && (
+                {!loading && !error && summary && (
                     <>
-                        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div className="rounded-xl border p-4">
+                        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
+                            <div
+                                className="rounded-xl border p-4"
+                                data-testid="metric-total"
+                            >
                                 <p className="text-sm text-muted-foreground">
                                     Total
                                 </p>
                                 <p className="text-2xl font-semibold">
-                                    {counts.total}
+                                    {summary.total}
                                 </p>
                             </div>
-                            <div className="rounded-xl border p-4">
+                            <div
+                                className="rounded-xl border p-4"
+                                data-testid="metric-positive"
+                            >
                                 <p className="text-sm text-muted-foreground">
                                     Positive
                                 </p>
                                 <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
-                                    {counts.pos}
+                                    {summary.positive}
                                 </p>
                             </div>
-                            <div className="rounded-xl border p-4">
+                            <div
+                                className="rounded-xl border p-4"
+                                data-testid="metric-negative"
+                            >
                                 <p className="text-sm text-muted-foreground">
                                     Negative
                                 </p>
                                 <p className="text-2xl font-semibold text-red-600 dark:text-red-400">
-                                    {counts.neg}
+                                    {summary.negative}
+                                </p>
+                            </div>
+                            <div
+                                className="rounded-xl border p-4"
+                                data-testid="metric-neutral"
+                            >
+                                <p className="text-sm text-muted-foreground">
+                                    Neutral
+                                </p>
+                                <p className="text-2xl font-semibold">
+                                    {summary.neutral}
                                 </p>
                             </div>
                         </section>
@@ -114,7 +134,7 @@ export default function Dashboard() {
                             </h2>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
-                                    data={counts.chart}
+                                    data={chartData}
                                     margin={{
                                         top: 10,
                                         right: 10,
@@ -127,10 +147,7 @@ export default function Dashboard() {
                                     <YAxis allowDecimals={false} />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar
-                                        dataKey="count"
-                                        name="Count" /* Let default colours apply */
-                                    />
+                                    <Bar dataKey="count" name="Count" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </section>
