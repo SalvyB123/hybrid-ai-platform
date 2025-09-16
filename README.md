@@ -177,7 +177,9 @@ The **frontend dashboard** consumes `/sentiment/summary` to render totals and a 
     -   Loading spinner and graceful error state
 
 **Screenshot:**
-To be added
+The dashboard visualises positive vs negative sentiment counts in real time:
+
+![Sentiment Dashboard](docs/assets/sentiment-dashboard.png)
 
 ---
 
