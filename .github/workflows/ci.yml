@@ -82,6 +82,21 @@ jobs:
             - name: Run migrations
               run: python -m alembic upgrade head
 
+            - name: Start API (background)
+              run: |
+                  nohup python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
+
+            - name: Wait for API
+              run: |
+                  for i in {1..30}; do
+                    curl -sf http://localhost:8000/health && break
+                    sleep 1
+                  done
+
+            - name: Readiness probe
+              run: |
+                  curl -sf http://localhost:8000/health
+                  curl -sf http://localhost:8000/readiness
             - name: Run tests
               run: pytest -q
 

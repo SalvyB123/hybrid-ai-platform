@@ -57,3 +57,7 @@ async def get_db() -> AsyncIterator[AsyncSession]:
 async def dispose_engine() -> None:
     """Call on app shutdown to close the engine cleanly."""
     await engine.dispose()
+
+
+# Backwards-compatible alias for existing endpoints/tests that expect this name
+get_async_session = get_db
