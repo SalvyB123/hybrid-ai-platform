@@ -11,7 +11,8 @@ import {
     YAxis,
 } from "recharts";
 import Spinner from "@/components/ui/spinner";
-import { SentimentRecord, fetchSentiments } from "@/lib/api";
+import type { SentimentRecord } from "@/lib/api";
+import { fetchSentiments } from "@/lib/api";
 
 type ChartDatum = { name: string; count: number };
 
