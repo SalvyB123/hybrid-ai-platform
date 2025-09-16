@@ -82,6 +82,10 @@ jobs:
             - name: Run migrations
               run: python -m alembic upgrade head
 
+            - name: Readiness probe
+              run: |
+                  curl -sf http://localhost:8000/health
+                  curl -sf http://localhost:8000/readiness
             - name: Run tests
               run: pytest -q
 
