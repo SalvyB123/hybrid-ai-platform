@@ -70,3 +70,22 @@ mig-history:
 mig-current:
 	$(ALEMBIC) current
 
+# --- Dev convenience targets (backend + frontend) ---
+
+.PHONY: dev backend frontend migrate
+
+# Launch both services via the helper script (preferred)
+dev:
+	./scripts/dev.sh
+
+# Run just the backend (FastAPI/uvicorn)
+backend:
+	python -m uvicorn src.api.app:app --reload --port 8000
+
+# Run just the frontend (Vite)
+frontend:
+	cd frontend && npm run dev
+
+# Apply latest DB migrations
+migrate:
+	python -m alembic upgrade head
