@@ -8,7 +8,10 @@ export type SentimentSummary = {
     total: number;
 };
 
-type FetchOptions = { signal?: AbortSignal; timeoutMs?: number };
+type FetchOptions = {
+    signal?: AbortSignal;
+    timeoutMs?: number;
+};
 
 async function apiGet<T>(path: string, opts: FetchOptions = {}): Promise<T> {
     const controller = new AbortController();
@@ -16,6 +19,7 @@ async function apiGet<T>(path: string, opts: FetchOptions = {}): Promise<T> {
         () => controller.abort(),
         opts.timeoutMs ?? 8000,
     );
+
     try {
         const res = await fetch(`${BASE_URL}${path}`, {
             method: "GET",
