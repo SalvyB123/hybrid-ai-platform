@@ -1,8 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
-# Adjust import to your app factory if you use one
-from src.api.app import app
+from src.api.app import app  # adjust if your app object lives elsewhere
 
 @pytest.mark.anyio
 async def test_health_ok():
@@ -23,7 +22,6 @@ async def test_readiness_ok(db_session_ready):  # if you have a fixture, else dr
 @pytest.mark.anyio
 async def test_readiness_db_error(monkeypatch):
     from sqlalchemy.ext.asyncio import AsyncSession
-    from sqlalchemy import text
 
     async def broken_execute(self, *args, **kwargs):
         raise RuntimeError("boom")
