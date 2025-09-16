@@ -6,10 +6,10 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from src.api.routes import health as health_routes
 
 from src.api.errors import install_error_handlers
 from src.api.middleware.request_context import RequestContextMiddleware
+from src.api.routes import health as health_routes
 from src.api.routes.bookings import router as bookings_router
 from src.api.routes.faq import router as faq_router
 from src.api.routes.sentiment import router as sentiment_router
