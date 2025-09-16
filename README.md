@@ -32,11 +32,194 @@ tests/
   integration/          # Slower tests across components
 ```
 
-## Getting started (later steps)
+---
 
--   Create and activate a virtual env (e.g., `python -m venv .venv`).
--   Install dependencies (we'll add a `pyproject.toml` later).
--   Run lint and tests via `make` (see `Makefile`).
+## Prerequisites
+
+-   **Python** 3.11.x
+-   **Node.js** ≥ 20, **npm** ≥ 9
+-   **PostgreSQL** 16 (local Docker or service)
+-   **Make** (optional, for convenience)
+
+---
+
+## Environment
+
+Create a `.env` at the repository root (used by the backend and CI):
+
+```env
+# Database
+APP_DB_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/app
+
+# CORS (JSON array, parsed by pydantic-settings)
+CORS_ALLOWED_ORIGINS=["http://localhost:5173"]
+
+# Optional: logging level, etc.
+LOG_LEVEL=INFO
+```
+
+CI uses the same shape (see .github/workflows/ci.yml).
+
+---
+
+## Backend (FastAPI) - Setup and Run
+
+Create and activate a virtual environment, then install:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+# Install app + dev deps
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+Run **migrations:**
+
+```bash
+# Ensure Postgres is running and APP_DB_URL points to it
+python -m alembic upgrade head
+```
+
+Start the API:
+
+```bash
+uvicorn src.api.app:app --reload
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
+```
+
+Health & readiness:
+
+```bash
+curl -sf http://localhost:8000/health
+curl -sf http://localhost:8000/readiness
+```
+
+---
+
+## Frontend (Vite + React + Tailwind) – Setup & Run
+
+From the `frontend/` directory:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+# App: http://localhost:5173
+```
+
+The frontend expects the API at http://localhost:8000. You can override via:
+
+```bash
+# frontend/.env.local
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+---
+
+## Sentiment API – Usage
+
+**1) Analyse sentiment (persisted)**
+
+```bash
+curl -X POST http://localhost:8000/sentiment \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Support was helpful and great value."}'
+```
+
+**Response (201):**
+
+```json
+{
+    "id": "a2c2ce2d-2f9b-4d6d-94e2-6e8c1c3aa001",
+    "text": "Support was helpful and great value.",
+    "score": 0.74,
+    "label": "positive"
+}
+```
+
+Validation & errors:
+
+-   Empty text → 422 with error message
+-   Excessively long text → 422
+-   DB failure → 500 with a standard error envelope
+
+**2) Summarise sentiment (for dashboard)**
+
+```bash
+curl -s http://localhost:8000/sentiment/summary | jq
+```
+
+**Response (200):**
+
+```json
+{
+    "positive": 12,
+    "negative": 3,
+    "neutral": 4,
+    "total": 19
+}
+```
+
+The **frontend dashboard** consumes `/sentiment/summary` to render totals and a Positive vs Negative bar chart.
+
+---
+
+## Frontend Dashboard - What to Expect
+
+-   Navigate to http://localhost:5173/login, sign in (stub) → redirected to /dashboard.
+-   Dashboard shows:
+    -   Summary cards: Total, Positive, Negative
+    -   Bar chart (Recharts)
+    -   Loading spinner and graceful error state
+
+**Screenshot:**
+To be added
+
+---
+
+### Running Tests
+
+**Backend (pytest):**
+
+```bash
+source .venv/bin/activate
+pytest -q
+```
+
+**Frontend (Vitest + Cypress):**
+
+```bash
+cd frontend
+npm run test        # unit
+npm run cy:run      # e2e (starts Vite and runs Cypress)
+```
+
+---
+
+### Lint & Format
+
+**Python (Ruff + Black):**
+
+```bash
+ruff check . --fix
+black --check .
+```
+
+**JS/TS (ESLint + Prettier):**
+
+```bash
+cd frontend
+npm run lint
+npm run format:check
+```
+
+Pre-commit hooks can run these automatically on commit; see .pre-commit-config.yaml (Python) and Husky + lint-staged (frontend).
+
+---
 
 ## Database Migrations (Alembic – Async)
 
@@ -74,25 +257,13 @@ Check the current migration:
 make mig-current
 ```
 
-### Where things live
+**Where things live:**
 
 -   Migration scripts: src/db/migrations/versions/
 -   Alembic config: alembic.ini, src/db/migrations/env.py
 -   SQLAlchemy Base: src/db/session.py
 
-### CI/CD
-
-Our GitHub Actions workflow (.github/workflows/ci.yml) runs:
-
-```bash
-python -m alembic upgrade head
-```
-
-before executing tests to ensure the schema is always up to date.
-
-### Roadmap references
-
-See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
+---
 
 ### FAQ BOT (V1)
 
@@ -154,6 +325,26 @@ This design ensures graceful fallback: users aren’t misled by low-confidence a
 docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog
 open http://localhost:8025
 ```
+
+---
+
+### CI/CD
+
+Our GitHub Actions workflow (.github/workflows/ci.yml) runs:
+
+```bash
+python -m alembic upgrade head
+```
+
+before executing tests to ensure the schema is always up to date.
+
+---
+
+### Roadmap references
+
+See `/docs/roadmap.md` (placeholder) and ADRs in `/adr` for decisions.# trigger ci
+
+---
 
 ## Branching & PRs (modern Git)
 
