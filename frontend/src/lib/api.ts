@@ -1,14 +1,6 @@
 // frontend/src/lib/api.ts
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
-export type SentimentRecord = {
-    id: string;
-    text: string;
-    score: number;
-    label: "positive" | "negative" | "neutral";
-    created_at?: string;
-};
-
 export type SentimentSummary = {
     positive: number;
     negative: number;
@@ -16,21 +8,14 @@ export type SentimentSummary = {
     total: number;
 };
 
-type FetchOptions = {
-    signal?: AbortSignal;
-    timeoutMs?: number;
-};
+type FetchOptions = { signal?: AbortSignal; timeoutMs?: number };
 
-export async function apiGet<T>(
-    path: string,
-    opts: FetchOptions = {},
-): Promise<T> {
+async function apiGet<T>(path: string, opts: FetchOptions = {}): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(
         () => controller.abort(),
         opts.timeoutMs ?? 8000,
     );
-
     try {
         const res = await fetch(`${BASE_URL}${path}`, {
             method: "GET",
@@ -49,15 +34,6 @@ export async function apiGet<T>(
     }
 }
 
-/** Fetch aggregated counts for the dashboard */
-export async function fetchSentimentSummary(): Promise<SentimentSummary> {
+export function fetchSentimentSummary(): Promise<SentimentSummary> {
     return apiGet<SentimentSummary>("/sentiment/summary");
-}
-
-/** (Optional) Keep this if/when you add GET /sentiment */
-export async function fetchSentiments(limit = 100): Promise<SentimentRecord[]> {
-    // This will 405 until a list endpoint exists on the backend.
-    return apiGet<SentimentRecord[]>(
-        `/sentiment?limit=${encodeURIComponent(limit)}`,
-    );
 }
