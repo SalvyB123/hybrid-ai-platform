@@ -9,6 +9,13 @@ export type SentimentRecord = {
     created_at?: string;
 };
 
+export type SentimentSummary = {
+    positive: number;
+    negative: number;
+    neutral: number;
+    total: number;
+};
+
 type FetchOptions = {
     signal?: AbortSignal;
     timeoutMs?: number;
@@ -42,11 +49,15 @@ export async function apiGet<T>(
     }
 }
 
-/**
- * Fetch recent sentiments. The backend may return an array or a paginated shape.
- * This implementation assumes an array endpoint like GET /sentiment.
- * If your API differs (e.g. GET /sentiment?limit=100), adjust here.
- */
-export async function fetchSentiments(): Promise<SentimentRecord[]> {
-    return apiGet<SentimentRecord[]>("/sentiment");
+/** Fetch aggregated counts for the dashboard */
+export async function fetchSentimentSummary(): Promise<SentimentSummary> {
+    return apiGet<SentimentSummary>("/sentiment/summary");
+}
+
+/** (Optional) Keep this if/when you add GET /sentiment */
+export async function fetchSentiments(limit = 100): Promise<SentimentRecord[]> {
+    // This will 405 until a list endpoint exists on the backend.
+    return apiGet<SentimentRecord[]>(
+        `/sentiment?limit=${encodeURIComponent(limit)}`,
+    );
 }
