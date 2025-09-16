@@ -20,6 +20,7 @@ class SentimentResponse(BaseModel):
 
 class SentimentSummaryResponse(BaseModel):
     """Aggregate counts for dashboard usage."""
+
     positive: int = 0
     negative: int = 0
     neutral: int = 0
