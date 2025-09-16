@@ -1,4 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env sh
+set -euo pipefail
 
-cd frontend
-npx lint-staged
+# Repo root (works even if hook runs from a subdir)
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+# 1) Frontend staged checks (JS/TS) via lint-staged inside frontend/
+# Use a subshell so our cwd remains the repo root afterwards
+( cd frontend && npx --no-install lint-staged )
+
+# 2) Python lint/format (Ruff + Black) via pre-commit at repo root
+# Prefer invoking via python so your .venv is used even if PATH isn't set
+if [ -x ".venv/bin/python" ]; then
+  .venv/bin/python -m pre_commit run --hook-stage pre-commit --show-diff-on-failure
+else
+  # Fallback if no local venv — assumes 'pre-commit' is on PATH
+  pre-commit run --hook-stage pre-commit --show-diff-on-failure
+fi
