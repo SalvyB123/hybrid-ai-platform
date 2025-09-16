@@ -16,3 +16,8 @@ class SentimentResponse(BaseModel):
     text: str
     score: float
     label: Literal["positive", "negative", "neutral"]
+
+class SentimentSummary(BaseModel):
+    positive: int
+    negative: int
+    neutral: int
